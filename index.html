@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login modelo</title>
+    
+    <!-- FontAwesome CDN for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+
+    <style>
+        /* =========================== */
+        /* Reset general de estilos    */
+        /* =========================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* =========================== */
+        /* Estilos generales del body  */
+        /* =========================== */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* =========================== */
+        /* Header y Footer             */
+        /* =========================== */
+        header, footer {
+            flex: 0 0 10%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background-color: #816952;
+            font-size: 2.5rem; /* Ajusta el valor según sea necesario */
+            color: white;
+        }
+
+        /* Logo */
+        .logo img {
+            margin-top: 8px; 
+            margin-bottom: 8px; 
+            width: 150px;
+            height: auto;
+            border-radius: 12px;
+        }
+
+        /* Menú desplegable */
+        .menu {
+            position: relative;
+        }
+
+        .menu button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+        }
+
+        .menu ul {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: #665337;
+            border-radius: 12px;
+            width: 180px;
+            list-style: none;
+            padding: 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu ul li {
+            border-bottom: 1px solid #eceacb;
+            padding: 12px 15px;
+        }
+
+        .menu ul li:last-child {
+            border-bottom: none;
+        }
+
+        .menu ul li a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 18px;
+            display: flex;
+            align-items: center;border-radius: 12px;
+        }
+
+        .menu ul li a:hover {
+            border-radius: 4px;
+            background-color: #bb8c47;
+        }
+
+        .menu ul li i {
+            margin-right: 10px;
+            color: #011216;
+        }
+        .menu ul li a i {
+        color: white;
+       }
+
+        /* Mostrar menú desplegable */
+        .menu:hover ul {
+            display: block;
+        }
+
+        /* =========================== */
+        /* Main: Layout de columnas    */
+        /* =========================== */
+        main {
+            flex: 1;
+            display: flex;
+        }
+
+        .column {
+            flex: 0 0 20%;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .column.left {
+            background-image: url('imag1.jpg');
+        }
+
+        .column.middle {
+            flex: 0 0 60%;
+            background-color: #f4f4f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .column.right {
+            background-image: url('imag3.jpg');
+        }
+
+        /* =========================== */
+        /* Formulario                  */
+        /* =========================== */
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            padding: 20px; /* Agregar padding alrededor del contenedor */
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      box-shadow: 0 4px 6px rgba(126, 10, 10, 0.1);
+
+        }
+
+        .form-container label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        .form-container input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #0f3d3d;
+            border-radius: 5px;
+        }
+
+        .form-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .form-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .form-container a {
+            color: #007BFF;
+            text-decoration: none;
+            display: block;
+            margin: 8px 0;
+        }
+
+        .form-container a:hover {
+            text-decoration: underline;
+        }
+
+        .google-auth button {
+            margin: 20px 0;
+            background-color: #d6868d;
+        }
+
+        /* =========================== */
+        /* Footer: Redes Sociales      */
+        /* =========================== */
+        .social-icons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 1.5rem;
+            text-decoration: none;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- =========================== -->
+    <!-- Header con Logo y Menú      -->
+    <!-- =========================== -->
+    <header>
+        <div class="logo">
+            <img src="https://i.imgur.com/ZH6xioV.jpeg" alt="Logo">
+        </div>
+        <div class="text">Shift</div>
+        <div class="menu">
+            <button>&#9776;</button>
+            <ul>
+                <li><a href="html1.html"><i class="fa-solid fa-house"></i> HTML1</a></li>
+                <li><a href="html2.html"><i class="fa-solid fa-user"></i> HTML2</a></li>
+                <li><a href="html3.html"><i class="fa-solid fa-envelope"></i> HTML3</a></li>
+                <li><a href="html4.html"><i class="fa-solid fa-layer-group"></i> HTML4</a></li>
+                <li><a href="html5.html"><i class="fa-solid fa-gear"></i> HTML5</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- =========================== -->
+    <!-- Main Content                -->
+    <!-- =========================== -->
+    <main>
+        <div class="column left"></div>
+        <div class="column middle">
+            <div class="form-container">
+                
+                <button onclick="validateLogin()">INGRESAR</button>
+
+               
+        </div>
+        <div class="column right"></div>
+    </main>
+
+    <!-- =========================== -->
+    <!-- Footer: Redes Sociales      -->
+    <!-- =========================== -->
+    <footer>
+        <div class="social-icons">
+            <a href="https://twitter.com" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="https://linkedin.com" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+            <a href="https://instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            <a href="https://facebook.com" target="_blank"><i class="fa-brands fa-square-facebook"></i></a>
+        </div>
+    </footer>
+
+    <!-- =========================== -->
+    <!-- Script de validación        -->
+    <!-- =========================== -->
+    <script>
+        function validateLogin() {
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>
