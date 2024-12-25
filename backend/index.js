@@ -9,15 +9,18 @@ const app = express();
 const port = 3000;
 
 // Configuración de la base de datos
-const db = mysql.createConnection({
+const db = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: 'Android',
   database: 'user_registration',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
 
 // Conexión a la base de datos
-db.connect((err) => {
+db.getConnection((err) => {
   if (err) {
     console.error('Error al conectar con la base de datos:', err);
     return;
@@ -28,37 +31,58 @@ db.connect((err) => {
 // Middleware
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'http://127.0.0.1:5500',
+  origin: ['http://127.0.0.1:5500', 'http://localhost:5500'], // Permite ambas URL
 }));
+
 
 // Ruta para registrar un usuario
 app.post('/register', async (req, res) => {
   const { name, email, password, gender, birthdate } = req.body;
 
   try {
-    // Encriptar la contraseña
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Insertar el usuario en la base de datos
-    const query = `
-      INSERT INTO users (name, email, password, gender, birthdate)
-      VALUES (?, ?, ?, ?, ?)
-    `;
-    db.query(
-      query,
-      [name, email, hashedPassword, gender, birthdate],
-      (err, result) => {
-        if (err) {
-          console.error('Error al registrar al usuario:', err);
-          res.status(500).json({ message: 'Error al registrar al usuario.' });
-          return;
-        }
-        res.status(201).json({ message: 'Usuario registrado con éxito.' });
+    // Verificar si el correo ya existe
+    const query = 'SELECT * FROM users WHERE email = ?';
+    db.query(query, [email], async (err, results) => {
+      if (err) {
+        console.error('Error al verificar el correo:', err);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+        return;
       }
-    );
-  } catch (err) {
-    console.error('Error al encriptar la contraseña:', err);
+
+      // Validar si el correo ya existe
+      if (results && results.length > 0) {
+        return res.status(409).json({ message: 'El correo ya está registrado.' });
+    }
+    
+      try {
+        // Encriptar la contraseña
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Insertar el usuario en la base de datos
+        const insertQuery = `
+          INSERT INTO users (name, email, password, gender, birthdate)
+          VALUES (?, ?, ?, ?, ?)
+        `;
+        db.query(
+          insertQuery,
+          [name, email, hashedPassword, gender, birthdate],
+          (err, result) => {
+            if (err) {
+              console.error('Error al registrar al usuario:', err);
+              res.status(500).json({ message: 'Error al registrar al usuario.' });
+              return;
+            }
+            res.status(201).json({ message: 'Usuario registrado con éxito.' });
+          }
+        );
+      } catch (hashError) {
+        console.error('Error al encriptar la contraseña:', hashError);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+      }
+    });
+  } catch (outerError) {
+    console.error('Error inesperado:', outerError);
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 });
@@ -96,7 +120,7 @@ app.post('/login', async (req, res) => {
     });
   } catch (err) {
     console.error('Error durante el inicio de sesión:', err);
-    res.status(500).send('Error interno del servidor.');
+    res.status(500).json({ message: 'Error interno del servidor.' });
   }
 });
 

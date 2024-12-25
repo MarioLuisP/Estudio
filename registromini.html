@@ -307,6 +307,7 @@ function submitRegistration(event) {
         return;
     }
 
+
     const userData = {
         name,
         email,
@@ -314,6 +315,7 @@ function submitRegistration(event) {
         gender,
         birthdate
     };
+
     fetch('http://localhost:3000/register', {
         method: 'POST',
         headers: {
@@ -321,15 +323,24 @@ function submitRegistration(event) {
         },
         body: JSON.stringify(userData),
     })
-        .then((response) => response.json())
-        .then((data) => {
-            console.log('Respuesta del backend:', data);
-            document.getElementById('api-response').innerText = data.message;
-        })
-        .catch((error) => {
-            console.error('Error al enviar los datos:', error);
-            document.getElementById('api-response').innerText = 'Ocurrió un error al enviar los datos.';
-        });
-}    </script>
+    .then((response) => {
+        if (response.status === 409) {
+            throw new Error('El correo ya está registrado.');
+        } else if (!response.ok) {
+            throw new Error('Ocurrió un error al registrar el usuario.');
+        }
+        return response.json();
+    })
+    .then((data) => {
+        console.log('Respuesta del backend:', data);
+        document.getElementById('api-response').innerText = data.message;
+    })
+    .catch((error) => {
+        console.error('Error al enviar los datos:', error.message);
+        document.getElementById('api-response').innerText = error.message;
+    });
+}
+ 
+</script>
 </body>
 </html>
