@@ -277,20 +277,49 @@
         </div>
     </footer>
 
-    <!-- =========================== -->
-    <!-- Script de validación        -->
-    <!-- =========================== -->
-    <script>
-        function validateLogin() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            if (email === 'test@example.com' && password === '1234') {
-                window.location.href = 'page1.html';
-            } else {
-                document.getElementById('api-response').innerText = 'Correo o contraseña incorrectos';
-            }
+   <!-- =========================== -->
+<!-- Script de validación        -->
+<!-- =========================== -->
+<script>
+    function validateLogin() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        if (!email || !password) {
+            document.getElementById('api-response').innerText = 'Por favor, complete todos los campos.';
+            return;
         }
-    </script>
+
+        const userData = { email, password };
+
+        fetch('http://localhost:3000/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+        })
+            .then(response => {
+                if (response.status === 404) {
+                    throw new Error('Usuario no encontrado.');
+                }
+                if (response.status === 401) {
+                    throw new Error('Contraseña incorrecta.');
+                }
+                if (!response.ok) {
+                    throw new Error('Error en el inicio de sesión.');
+                }
+                return response.text(); // Cambia esto si necesitas JSON
+            })
+            .then(message => {
+                document.getElementById('api-response').innerText = message;
+                window.location.href = 'page1.html'; // Redirigir al usuario en caso de éxito
+            })
+            .catch(error => {
+                console.error('Error al iniciar sesión:', error);
+                document.getElementById('api-response').innerText = error.message;
+            });
+    }
+</script>
 </body>
 </html>
