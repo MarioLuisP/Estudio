@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .form-container { margin: 20px 0; padding: 20px; background: #f9f9f9; }
+        button { margin: 5px; padding: 5px 10px; }
+        input, select { margin: 5px; padding: 5px; }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <h3>Buscar Usuario</h3>
+        <input type="text" id="searchInput" placeholder="Buscar...">
+        <select id="searchType">
+            <option value="id">ID</option>
+            <option value="name">Nombre</option>
+            <option value="email">Email</option>
+        </select>
+        <button onclick="searchUser()">Buscar</button>
+        <button onclick="loadUsers()">Ver Todos</button>
+    </div>
+
+    <div class="form-container">
+        <h3>Gestionar Usuario</h3>
+        <input type="hidden" id="userId">
+        <input type="text" id="name" placeholder="Nombre" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Contraseña">
+        <select id="gender" required>
+            <option value="male">Hombre</option>
+            <option value="female">Mujer</option>
+            <option value="other">Otro</option>
+        </select>
+        <input type="date" id="birthdate" required>
+        <div>
+            <button onclick="addUser()">Agregar</button>
+            <button onclick="updateUser()">Actualizar</button>
+            <button onclick="deleteUser()">Eliminar</button>
+            <button onclick="clearForm()">Limpiar</button>
+        </div>
+    </div>
+
+    <table id="usersTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Género</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        function loadUsers() {
+            fetch('http://localhost:3000/api/users')
+                .then(response => response.json())
+                .then(users => {
+                    const tbody = document.querySelector('#usersTable tbody');
+                    tbody.innerHTML = '';
+                    users.forEach(user => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${user.id}</td>
+                                <td>${user.name}</td>
+                                <td>${user.email}</td>
+                                <td>${user.gender}</td>
+                                <td>${new Date(user.birthdate).toLocaleDateString()}</td>
+                                <td>
+                                    <button onclick='fillForm(${JSON.stringify(user)})'>Editar</button>
+                                    <button onclick='deleteUserDirect(${user.id})'>Eliminar</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(error => alert('Error al cargar usuarios: ' + error));
+        }
+
+        function fillForm(user) {
+            document.getElementById('userId').value = user.id;
+            document.getElementById('name').value = user.name;
+            document.getElementById('email').value = user.email;
+            document.getElementById('gender').value = user.gender;
+            document.getElementById('birthdate').value = user.birthdate.split('T')[0];
+        }
+
+        function addUser() {
+            if (!validateForm()) return;
+
+            const userData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value || 'defaultPassword',
+                gender: document.getElementById('gender').value,
+                birthdate: document.getElementById('birthdate').value
+            };
+
+            fetch('http://localhost:3000/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            })
+            .then(response => response.json())
+            .then(() => {
+                alert('Usuario agregado exitosamente');
+                loadUsers();
+                clearForm();
+            })
+            .catch(error => alert('Error al agregar usuario: ' + error));
+        }
+
+        function updateUser() {
+            if (!validateForm()) return;
+            
+            const id = document.getElementById('userId').value;
+            if (!id) {
+                alert('Por favor seleccione un usuario para actualizar');
+                return;
+            }
+
+            const userData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                gender: document.getElementById('gender').value,
+                birthdate: document.getElementById('birthdate').value
+            };
+
+            fetch(`http://localhost:3000/api/users/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            })
+            .then(response => response.json())
+            .then(() => {
+                alert('Usuario actualizado exitosamente');
+                loadUsers();
+                clearForm();
+            })
+            .catch(error => alert('Error al actualizar usuario: ' + error));
+        }
+
+        function deleteUserDirect(id) {
+            if (confirm('¿Está seguro de eliminar este usuario?')) {
+                fetch(`http://localhost:3000/api/users/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(() => {
+                    alert('Usuario eliminado exitosamente');
+                    loadUsers();
+                    clearForm();
+                })
+                .catch(error => alert('Error al eliminar usuario: ' + error));
+            }
+        }
+
+        function deleteUser() {
+            const id = document.getElementById('userId').value;
+            if (!id) {
+                alert('Por favor seleccione un usuario para eliminar');
+                return;
+            }
+            deleteUserDirect(id);
+        }
+
+        function searchUser() {
+            const value = document.getElementById('searchInput').value;
+            const type = document.getElementById('searchType').value;
+            
+            if (!value) {
+                loadUsers();
+                return;
+            }
+
+            fetch(`http://localhost:3000/api/users/search?type=${type}&value=${value}`)
+                .then(response => response.json())
+                .then(users => {
+                    const tbody = document.querySelector('#usersTable tbody');
+                    tbody.innerHTML = '';
+                    users.forEach(user => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${user.id}</td>
+                                <td>${user.name}</td>
+                                <td>${user.email}</td>
+                                <td>${user.gender}</td>
+                                <td>${new Date(user.birthdate).toLocaleDateString()}</td>
+                                <td>
+                                    <button onclick='fillForm(${JSON.stringify(user)})'>Editar</button>
+                                    <button onclick='deleteUserDirect(${user.id})'>Eliminar</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(error => alert('Error en la búsqueda: ' + error));
+        }
+
+        function validateForm() {
+            const requiredFields = ['name', 'email', 'gender', 'birthdate'];
+            for (let field of requiredFields) {
+                if (!document.getElementById(field).value) {
+                    alert(`Por favor complete el campo ${field}`);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function clearForm() {
+            document.getElementById('userId').value = '';
+            document.getElementById('name').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('gender').value = 'male';
+            document.getElementById('birthdate').value = '';
+        }
+
+        window.onload = loadUsers;
+    </script>
+</body>
+</html>
