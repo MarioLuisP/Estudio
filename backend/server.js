@@ -31,7 +31,7 @@ app.use(cors({
 }));
 
 // Rutas existentes de autenticación
-app.post('/register', async (req, res) => {
+app.post('/api/register', async (req, res) => {
   const { name, email, password, gender, birthdate } = req.body;
 
   try {
@@ -67,7 +67,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.post('/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {

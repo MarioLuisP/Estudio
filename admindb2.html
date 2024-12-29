@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Admin Panel</title>
     <style>
         table { width: 100%; border-collapse: collapse; margin: 20px 0; }
@@ -26,6 +27,7 @@
 
     <div class="form-container">
         <h3>Gestionar Usuario</h3>
+        <input type="number" id="customId" placeholder="ID personalizado" required>
         <input type="hidden" id="userId">
         <input type="text" id="name" placeholder="Nombre" required>
         <input type="email" id="email" placeholder="Email" required>
@@ -91,10 +93,44 @@
             document.getElementById('gender').value = user.gender;
             document.getElementById('birthdate').value = user.birthdate.split('T')[0];
         }
-
         function addUser() {
-            if (!validateForm()) return;
+    if (!validateForm()) return;
 
+    const customId = document.getElementById('customId').value;
+    
+    // Primero verificar si el ID existe
+    fetch(`http://localhost:3000/api/users/search?type=id&value=${customId}`)
+        .then(response => response.json())
+        .then(users => {
+            if (users.length > 0) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'El ID ya está en uso. Por favor elija otro ID.',
+                    icon: 'error'
+                });
+                return;
+            }
+            
+            // Verificar si el email existe
+            const email = document.getElementById('email').value;
+            return fetch(`http://localhost:3000/api/users/search?type=email&value=${email}`);
+        })
+        .then(response => {
+            if (!response) return; // Si hubo error en ID, response será undefined
+            return response.json();
+        })
+        .then(users => {
+            if (!users) return; // Si hubo error previo
+            if (users.length > 0) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'El email ya está registrado. Por favor use otro email.',
+                    icon: 'error'
+                });
+                return;
+            }
+            
+            // Si no hay conflictos, proceder con la creación
             const userData = {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
@@ -103,75 +139,135 @@
                 birthdate: document.getElementById('birthdate').value
             };
 
-            fetch('http://localhost:3000/api/users', {
+            return fetch('http://localhost:3000/api/users', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData)
-            })
-            .then(response => response.json())
-            .then(() => {
-                alert('Usuario agregado exitosamente');
+            });
+        })
+        .then(response => {
+            if (!response) return; // Si hubo conflicto, response será undefined
+            return response.json();
+        })
+        .then(data => {
+            if (data) {
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'Usuario agregado exitosamente',
+                    icon: 'success'
+                });
                 loadUsers();
                 clearForm();
-            })
-            .catch(error => alert('Error al agregar usuario: ' + error));
-        }
-
-        function updateUser() {
-            if (!validateForm()) return;
-            
-            const id = document.getElementById('userId').value;
-            if (!id) {
-                alert('Por favor seleccione un usuario para actualizar');
-                return;
             }
+        })
+        .catch(error => {
+            Swal.fire({
+                title: 'Error',
+                text: 'Error al agregar usuario: ' + error,
+                icon: 'error'
+            });
+        });
+}
 
-            const userData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                gender: document.getElementById('gender').value,
-                birthdate: document.getElementById('birthdate').value
-            };
+function updateUser() {
+    if (!validateForm()) return;
+    
+    const id = document.getElementById('userId').value;
+    if (!id) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Por favor seleccione un usuario para actualizar',
+            icon: 'warning'
+        });
+        return;
+    }
 
+    const password = document.getElementById('password').value;
+    if (password) {
+        Swal.fire({
+            title: '¿Cambiar contraseña?',
+            text: '¿Está seguro que desea cambiar la contraseña del usuario?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, cambiar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                proceedWithUpdate(id, true);
+            }
+        });
+    } else {
+        proceedWithUpdate(id, false);
+    }
+}
+
+function proceedWithUpdate(id, passwordChanged) {
+    const userData = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        password: passwordChanged ? document.getElementById('password').value : undefined,
+        gender: document.getElementById('gender').value,
+        birthdate: document.getElementById('birthdate').value
+    };
+
+    fetch(`http://localhost:3000/api/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+    })
+    .then(response => response.json())
+    .then(() => {
+        Swal.fire({
+            title: '¡Éxito!',
+            text: `Usuario actualizado exitosamente${passwordChanged ? ' y contraseña cambiada' : ''}`,
+            icon: 'success'
+        });
+        loadUsers();
+        clearForm();
+    })
+    .catch(error => {
+        Swal.fire({
+            title: 'Error',
+            text: 'Error al actualizar usuario: ' + error,
+            icon: 'error'
+        });
+    });
+}
+function deleteUserDirect(id) {
+    Swal.fire({
+        title: '¿Está seguro?',
+        text: "Esta acción no se puede deshacer",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+    }).then((result) => {
+        if (result.isConfirmed) {
             fetch(`http://localhost:3000/api/users/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData)
+                method: 'DELETE'
             })
             .then(response => response.json())
             .then(() => {
-                alert('Usuario actualizado exitosamente');
+                Swal.fire(
+                    '¡Eliminado!',
+                    'El usuario ha sido eliminado.',
+                    'success'
+                );
                 loadUsers();
                 clearForm();
             })
-            .catch(error => alert('Error al actualizar usuario: ' + error));
+            .catch(error => {
+                Swal.fire(
+                    'Error',
+                    'Error al eliminar usuario: ' + error,
+                    'error'
+                );
+            });
         }
-
-        function deleteUserDirect(id) {
-            if (confirm('¿Está seguro de eliminar este usuario?')) {
-                fetch(`http://localhost:3000/api/users/${id}`, {
-                    method: 'DELETE'
-                })
-                .then(response => response.json())
-                .then(() => {
-                    alert('Usuario eliminado exitosamente');
-                    loadUsers();
-                    clearForm();
-                })
-                .catch(error => alert('Error al eliminar usuario: ' + error));
-            }
-        }
-
-        function deleteUser() {
-            const id = document.getElementById('userId').value;
-            if (!id) {
-                alert('Por favor seleccione un usuario para eliminar');
-                return;
-            }
-            deleteUserDirect(id);
-        }
-
+    });
+}
         function searchUser() {
             const value = document.getElementById('searchInput').value;
             const type = document.getElementById('searchType').value;
@@ -216,15 +312,15 @@
             return true;
         }
 
-        function clearForm() {
-            document.getElementById('userId').value = '';
-            document.getElementById('name').value = '';
-            document.getElementById('email').value = '';
-            document.getElementById('password').value = '';
-            document.getElementById('gender').value = 'male';
-            document.getElementById('birthdate').value = '';
-        }
-
+    function clearForm() {
+    document.getElementById('userId').value = '';
+    document.getElementById('customId').value = '';
+    document.getElementById('name').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('gender').value = 'male';
+    document.getElementById('birthdate').value = '';
+}
         window.onload = loadUsers;
     </script>
 </body>
