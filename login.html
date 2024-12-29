@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login modelo</title>
     
@@ -280,13 +282,18 @@
    <!-- =========================== -->
 <!-- Script de validación        -->
 <!-- =========================== -->
+
 <script>
     function validateLogin() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
         if (!email || !password) {
-            document.getElementById('api-response').innerText = 'Por favor, complete todos los campos.';
+            Swal.fire({
+                title: 'Error',
+                text: 'Por favor, complete todos los campos.',
+                icon: 'error'
+            });
             return;
         }
 
@@ -312,14 +319,29 @@
                 return response.text(); // Cambia esto si necesitas JSON
             })
             .then(message => {
-                document.getElementById('api-response').innerText = message;
-                window.location.href = 'page1.html'; // Redirigir al usuario en caso de éxito
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: message, // Mensaje que devuelve el backend
+                    icon: 'success',
+                    showConfirmButton: false,
+                    timer: 2000 // Espera 2 segundos antes de cerrar la alerta
+}).then(() => {
+    // Redirige después de que la alerta se cierre automáticamente
+    setTimeout(() => {
+        window.location.href = 'page1.html'; // Cambia a la página deseada
+    }, 200); // Agrega un pequeño retraso para garantizar la redirección tras la alerta
+});
             })
             .catch(error => {
                 console.error('Error al iniciar sesión:', error);
-                document.getElementById('api-response').innerText = error.message;
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo iniciar sesión: ' + error.message,
+                    icon: 'error'
+                });
             });
     }
 </script>
+
 </body>
 </html>
