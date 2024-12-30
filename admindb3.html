@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Admin Panel Mejorado</title>
+    <style>
+         body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f9;
+        color: #333;
+        padding: 20px;
+        margin: 0;
+        height: 100vh;
+        overflow: hidden; /* Previene scroll en el body */
+    }
+    .main-container {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Contenedor de la columna izquierda (Buscador) */
+        .column-40 {
+            width: 40%;
+            background-color: #f4f4f4;
+            padding: 20px;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-container h3 {
+            margin-top: 0;
+        }
+
+        .form-container {
+            margin-top: 20px;
+        }
+
+        /* Contenedor de la columna derecha (Formulario de usuario) */
+        .column-60 {
+            width: 60%;
+            margin-left: 40%;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .form-container h3 {
+            margin-top: 0;
+        }
+
+        .table-container {
+            margin-left: 40%;
+            margin-top: 80px; /* espacio para el formulario y buscador */
+            width: 60%;
+            overflow-y: auto;
+        }
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #fff;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .table-container {
+        margin-top: 20px;
+        flex: 1;
+        overflow-y: auto;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+        table thead th {
+        position: sticky;
+        top: 0;
+        background: #007bff;
+        z-index: 1;
+    }
+
+        tr:hover {
+            background: #f1f1f1;
+        }
+
+        .form-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button.primary {
+            background: #007bff;
+            color: white;
+        }
+
+        button.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        button.danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        input, select {
+            margin: 5px 0;
+            padding: 10px;
+            width: calc(100% - 22px);
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        .highlight {
+            background: #eaf5ff !important;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-container h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .form-actions {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="column-40">
+        <div class="search-container">
+            <h3>Buscar Usuario</h3>
+            <input type="text" id="searchInput" placeholder="Buscar usuario por ID, nombre o email">
+            <select id="searchType">
+                <option value="id">ID</option>
+                <option value="name">Nombre</option>
+                <option value="email">Email</option>
+            </select>
+            <button class="primary" onclick="searchUser()">Buscar</button>
+            <button class="secondary" onclick="loadUsers()">Ver Todos</button>
+        </div>
+        <div class="form-container">
+            <h3>Gestionar Usuario</h3>
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                <input type="text" id="name" placeholder="Nombre" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Contraseña">
+                <select id="gender" required>
+                    <option value="male">Hombre</option>
+                    <option value="female">Mujer</option>
+                    <option value="other">Otro</option>
+                </select>
+                <input type="date" id="birthdate" required>
+                <div class="form-actions">
+                    <button class="primary" type="button" onclick="addUser()">Agregar</button>
+                    <button class="secondary" type="button" onclick="updateUser()">Actualizar</button>
+                    <button class="danger" type="button" onclick="deleteUser()">Eliminar</button>
+                    <button class="secondary" type="reset" onclick="clearForm()">Limpiar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="usersTable">  
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Género</th>
+                    <th>Fecha</th>        
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+    <script>
+        function loadUsers() {
+            fetch('http://localhost:3000/api/users')
+                .then(response => response.json())
+                .then(users => {
+                    const tbody = document.querySelector('#usersTable tbody');
+                    tbody.innerHTML = '';
+                    users.forEach(user => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${user.id}</td>
+                                <td>${user.name}</td>
+                                <td>${user.email}</td>
+                                <td>${user.gender}</td>
+                                <td>${new Date(user.birthdate).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="primary" onclick='fillForm(${JSON.stringify(user)})'>Editar</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(error => Swal.fire('Error', 'Error al cargar usuarios: ' + error, 'error'));
+        }
+
+        function fillForm(user) {
+            document.getElementById('userId').value = user.id;
+            document.getElementById('name').value = user.name;
+            document.getElementById('email').value = user.email;
+            document.getElementById('gender').value = user.gender;
+            document.getElementById('birthdate').value = user.birthdate.split('T')[0];
+
+            document.querySelectorAll('#usersTable tr').forEach(row => row.classList.remove('highlight'));
+            const selectedRow = [...document.querySelectorAll('#usersTable tr')].find(row => row.firstChild.textContent == user.id);
+            if (selectedRow) selectedRow.classList.add('highlight');
+        }
+
+        function addUser() {
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const gender = document.getElementById('gender').value;
+    const birthdate = document.getElementById('birthdate').value;
+
+    const userData = {
+        name,
+        email,
+        password: password || 'defaultPassword',
+        gender,
+        birthdate
+    };
+
+    fetch('http://localhost:3000/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+    })
+    .then(async response => {
+        const data = await response.json();
+        
+        if (response.status === 409) {
+            throw new Error(data.message || 'El email ya está registrado.');
+        }
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al crear usuario');
+        }
+        
+        return data;
+    })
+    .then(data => {
+        Swal.fire('¡Éxito!', 'Usuario agregado exitosamente', 'success');
+        loadUsers();
+        clearForm();
+    })
+    .catch(error => {
+        Swal.fire('Error', error.message, 'error');
+    });
+
+        }
+
+        function updateUser() {
+            const userId = document.getElementById('userId').value;
+            if (!userId) {
+                Swal.fire('Advertencia', 'Seleccione un usuario para actualizar.', 'warning');
+                return;
+            }
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const gender = document.getElementById('gender').value;
+            const birthdate = document.getElementById('birthdate').value;
+
+            if (password) {
+                Swal.fire({
+                    title: 'Cambio de contraseña',
+                    text: '¿Está seguro de que desea cambiar la contraseña del usuario?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cambiar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (!result.isConfirmed) {
+                        return;
+                    }
+                    sendUpdate();
+                });
+            } else {
+                sendUpdate();
+            }
+
+            function sendUpdate() {
+                const userData = {
+                    name,
+                    email,
+                    password: password || undefined,
+                    gender,
+                    birthdate
+                };
+
+                fetch(`http://localhost:3000/api/users/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                })
+                .then(response => {
+                    if (response.status === 409) {
+                        throw new Error('ID o Email ya registrado.');
+                    }
+                    if (!response.ok) {
+                        throw new Error('Error en la actualización.');
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    Swal.fire('¡Éxito!', 'Usuario actualizado correctamente.', 'success');
+                    loadUsers();
+                    clearForm();
+                })
+                .catch(error => {
+                    Swal.fire('Error', error.message, 'error');
+                });
+            }
+        }
+
+        function deleteUser() {
+            const userId = document.getElementById('userId').value;
+            if (!userId) {
+                Swal.fire('Advertencia', 'Seleccione un usuario para eliminar.', 'warning');
+                return;
+            }
+
+            Swal.fire({
+                title: '¿Está seguro?',
+                text: 'Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    fetch(`http://localhost:3000/api/users/${userId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al eliminar usuario');
+                        }
+                        return response.json();
+                    })
+                    .then(() => {
+                        Swal.fire('¡Eliminado!', 'Usuario eliminado correctamente.', 'success');
+                        loadUsers();
+                        clearForm();
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'No se pudo eliminar el usuario: ' + error.message, 'error');
+                    });
+                }
+            });
+        }
+
+        function clearForm() {
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.querySelectorAll('#usersTable tr').forEach(row => row.classList.remove('highlight'));
+        }
+
+        function searchUser() {
+            const searchInput = document.getElementById('searchInput').value;
+            const searchType = document.getElementById('searchType').value;
+
+            if (!searchInput) {
+                loadUsers();
+                return;
+            }
+
+            fetch(`http://localhost:3000/api/users/search?type=${searchType}&value=${searchInput}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la búsqueda');
+                    }
+                    return response.json();
+                })
+                .then(users => {
+                    const tbody = document.querySelector('#usersTable tbody');
+                    tbody.innerHTML = '';
+                    users.forEach(user => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${user.id}</td>
+                                <td>${user.name}</td>
+                                <td>${user.email}</td>
+                                <td>${user.gender}</td>
+                                <td>${new Date(user.birthdate).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="primary" onclick='fillForm(${JSON.stringify(user)})'>Editar</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(error => Swal.fire('Error', 'No se pudo completar la búsqueda: ' + error.message, 'error'));
+        }
+
+        window.onload = loadUsers;
+    </script>
+</body>
+</html>

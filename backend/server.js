@@ -113,35 +113,86 @@ app.get('/api/users/search', (req, res) => {
 });
 
 app.post('/api/users', async (req, res) => {
-    const { name, email, password, gender, birthdate } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    db.query(
-        'INSERT INTO users (name, email, password, gender, birthdate) VALUES (?, ?, ?, ?, ?)',
-        [name, email, hashedPassword, gender, birthdate],
-        (err, result) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ id: result.insertId, ...req.body });
-        }
-    );
+  const { name, email, password, gender, birthdate } = req.body;
+  
+  try {
+      // Primero verificar si el email ya existe
+      const [existingUsers] = await db.promise().query(
+          'SELECT id FROM users WHERE email = ?',
+          [email]
+      );
+
+      if (existingUsers.length > 0) {
+          return res.status(409).json({ 
+              message: 'El email ya está registrado en el sistema.' 
+          });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const [result] = await db.promise().query(
+          'INSERT INTO users (name, email, password, gender, birthdate) VALUES (?, ?, ?, ?, ?)',
+          [name, email, hashedPassword, gender, birthdate]
+      );
+
+      res.status(201).json({ 
+          id: result.insertId,
+          name,
+          email,
+          gender,
+          birthdate
+      });
+  } catch (error) {
+      console.error('Error al crear usuario:', error);
+      res.status(500).json({ message: 'Error al crear el usuario.' });
+  }
 });
 
-app.put('/api/users/:id', async (req, res) => {
-    const { id } = req.params;
-    const { name, email, password, gender, birthdate } = req.body;
-    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
-    
-    const updateFields = password 
-        ? [name, email, hashedPassword, gender, birthdate, id]
-        : [name, email, gender, birthdate, id];
-        
-    const query = password
-        ? 'UPDATE users SET name = ?, email = ?, password = ?, gender = ?, birthdate = ? WHERE id = ?'
-        : 'UPDATE users SET name = ?, email = ?, gender = ?, birthdate = ? WHERE id = ?';
 
-    db.query(query, updateFields, (err) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ id, name, email, gender, birthdate });
-    });
+app.put('/api/users/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, email, password, gender, birthdate, id: customId } = req.body;
+  const newId = customId || id;
+
+  try {
+      // Verificar si el nuevo ID ya está en uso (excluyendo el ID actual)
+      const [existingIds] = await db.promise().query(
+          'SELECT id FROM users WHERE id = ? AND id != ?',
+          [newId, id]
+      );
+
+      if (existingIds.length > 0) {
+          return res.status(409).json({ message: 'ID ya está en uso.' });
+      }
+
+      // Verificar si el email ya está en uso por otro usuario
+      const [existingEmails] = await db.promise().query(
+          'SELECT id FROM users WHERE email = ? AND id != ?',
+          [email, id]
+      );
+
+      if (existingEmails.length > 0) {
+          return res.status(409).json({ message: 'Email ya está en uso.' });
+      }
+
+      // Construir la consulta según si hay nueva contraseña o no
+      let query, updateFields;
+      
+      if (password) {
+          const hashedPassword = await bcrypt.hash(password, 10);
+          query = 'UPDATE users SET id = ?, name = ?, email = ?, password = ?, gender = ?, birthdate = ? WHERE id = ?';
+          updateFields = [newId, name, email, hashedPassword, gender, birthdate, id];
+      } else {
+          query = 'UPDATE users SET id = ?, name = ?, email = ?, gender = ?, birthdate = ? WHERE id = ?';
+          updateFields = [newId, name, email, gender, birthdate, id];
+      }
+
+      await db.promise().query(query, updateFields);
+      res.json({ id: newId, name, email, gender, birthdate });
+
+  } catch (error) {
+      console.error('Error en la actualización:', error);
+      res.status(500).json({ error: error.message });
+  }
 });
 
 app.delete('/api/users/:id', (req, res) => {
