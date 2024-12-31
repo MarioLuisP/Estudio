@@ -150,20 +150,9 @@ app.post('/api/users', async (req, res) => {
 
 app.put('/api/users/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, email, password, gender, birthdate, id: customId } = req.body;
-  const newId = customId || id;
+  const { name, email, password, gender, birthdate } = req.body;
 
   try {
-      // Verificar si el nuevo ID ya está en uso (excluyendo el ID actual)
-      const [existingIds] = await db.promise().query(
-          'SELECT id FROM users WHERE id = ? AND id != ?',
-          [newId, id]
-      );
-
-      if (existingIds.length > 0) {
-          return res.status(409).json({ message: 'ID ya está en uso.' });
-      }
-
       // Verificar si el email ya está en uso por otro usuario
       const [existingEmails] = await db.promise().query(
           'SELECT id FROM users WHERE email = ? AND id != ?',
@@ -176,24 +165,25 @@ app.put('/api/users/:id', async (req, res) => {
 
       // Construir la consulta según si hay nueva contraseña o no
       let query, updateFields;
-      
+
       if (password) {
           const hashedPassword = await bcrypt.hash(password, 10);
-          query = 'UPDATE users SET id = ?, name = ?, email = ?, password = ?, gender = ?, birthdate = ? WHERE id = ?';
-          updateFields = [newId, name, email, hashedPassword, gender, birthdate, id];
+          query = 'UPDATE users SET name = ?, email = ?, password = ?, gender = ?, birthdate = ? WHERE id = ?';
+          updateFields = [name, email, hashedPassword, gender, birthdate, id];
       } else {
-          query = 'UPDATE users SET id = ?, name = ?, email = ?, gender = ?, birthdate = ? WHERE id = ?';
-          updateFields = [newId, name, email, gender, birthdate, id];
+          query = 'UPDATE users SET name = ?, email = ?, gender = ?, birthdate = ? WHERE id = ?';
+          updateFields = [name, email, gender, birthdate, id];
       }
 
       await db.promise().query(query, updateFields);
-      res.json({ id: newId, name, email, gender, birthdate });
+      res.json({ id, name, email, gender, birthdate });
 
   } catch (error) {
       console.error('Error en la actualización:', error);
       res.status(500).json({ error: error.message });
   }
 });
+
 
 app.delete('/api/users/:id', (req, res) => {
     const { id } = req.params;
