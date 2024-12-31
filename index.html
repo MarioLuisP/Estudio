@@ -53,64 +53,60 @@
 
         /* Menú desplegable */
         .menu {
-            position: relative;
-        }
+    position: relative;
+}
 
-        .menu button {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 2.5rem;
-            cursor: pointer;
-        }
+.menu button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2.5rem;
+    cursor: pointer;
+}
 
-        .menu ul {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 100%;
-            background-color: #665337;
-            border-radius: 12px;
-            width: 180px;
-            list-style: none;
-            padding: 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
+.menu ul {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: #665337;
+    border-radius: 12px;
+    width: 180px;
+    list-style: none;
+    padding: 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
 
-        .menu ul li {
-            border-bottom: 1px solid #eceacb;
-            padding: 12px 15px;
-        }
+.menu ul li {
+    border-bottom: 1px solid #eceacb;
+    padding: 12px 15px;
+}
 
-        .menu ul li:last-child {
-            border-bottom: none;
-        }
+.menu ul li:last-child {
+    border-bottom: none;
+}
 
-        .menu ul li a {
-            text-decoration: none;
-            color: #ffffff;
-            font-size: 18px;
-            display: flex;
-            align-items: center;border-radius: 12px;
-        }
+.menu ul li a {
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    border-radius: 12px;
+}
 
-        .menu ul li a:hover {
-            border-radius: 4px;
-            background-color: #bb8c47;
-        }
+.menu ul li a:hover {
+    background-color: #bb8c47;
+}
 
-        .menu ul li i {
-            margin-right: 10px;
-            color: #011216;
-        }
-        .menu ul li a i {
-        color: white;
-       }
+.menu ul li i {
+    margin-right: 10px;
+    color: #011216;
+}
 
-        /* Mostrar menú desplegable */
-        .menu:hover ul {
-            display: block;
-        }
+.menu ul li a i {
+    color: white;
+}
 
         /* =========================== */
         /* Main: Layout de columnas    */
@@ -226,8 +222,8 @@
         </div>
         <div class="text">Shift</div>
         <div class="menu">
-            <button>&#9776;</button>
-            <ul>
+            <button onclick="toggleMenu()">&#9776;</button>
+            <ul id="dropdown-menu">
                 <li><a href="html1.html"><i class="fa-solid fa-house"></i> HTML1</a></li>
                 <li><a href="html2.html"><i class="fa-solid fa-user"></i> HTML2</a></li>
                 <li><a href="html3.html"><i class="fa-solid fa-envelope"></i> HTML3</a></li>
@@ -235,7 +231,7 @@
                 <li><a href="html5.html"><i class="fa-solid fa-gear"></i> HTML5</a></li>
             </ul>
         </div>
-    </header>
+           </header>
 
     <!-- =========================== -->
     <!-- Main Content                -->
@@ -271,6 +267,30 @@
         function validateLogin() {
             window.location.href = "login.html";
         }
+    
     </script>
+        <script>
+    function toggleMenu() {
+        var menu = document.getElementById("dropdown-menu");
+        if (menu.style.display === "block") {
+            menu.style.display = "none";
+        } else {
+            menu.style.display = "block";
+        }
+    }
+    
+    // Cerrar el menú si se hace clic fuera de él
+    window.onclick = function(event) {
+        if (!event.target.matches('.menu button')) {
+            var dropdowns = document.getElementsByClassName("menu");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i].getElementsByTagName("ul")[0];
+                if (openDropdown.style.display === "block") {
+                    openDropdown.style.display = "none";
+                }
+            }
+        }
+    }
+</script> 
 </body>
 </html>
