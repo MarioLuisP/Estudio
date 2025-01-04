@@ -6,7 +6,6 @@ const cors = require("cors");
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-
 const app = express();
 const port = 3000;
 
@@ -26,7 +25,6 @@ app.use(cors({
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
