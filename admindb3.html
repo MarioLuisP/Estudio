@@ -175,8 +175,8 @@ tr:hover {
 	background: #f1f1f1;
 }
 .form-container {
-	margin: 20px 0;
-	padding: 20px;
+	margin: 10px 0;
+	padding: 10px;
 	background: #ebecae;
 	border: 2px solid #838f42;
 	border-radius: 10px;
@@ -217,10 +217,10 @@ input,select {
 	background: #eaf5ff !important;
 }
 .form-actions {
-	margin-top: 20px;
+	margin-top: 10px;
 }
 .form-container {
-	margin-top: 20px;
+	margin-top: 10px;
 }
 
     </style>
@@ -299,8 +299,11 @@ input,select {
             </div>
           </form>
         </div>
-        <div style="display: flex; justify-content: center; align-items: center;">
-          <img id="xxxxxxx" style="max-width: 40%; max-height: 300px; margin-top: 10px; display: none;">
+        <div style="display: flex; justify-content: center; align-items: center;border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);	background: #5de4cd;
+  ">
+          <img id="xxxxxxx" style="max-width: 30%; max-height: 300px; margin-top: 5px; display: none;border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);">
         </div>
       </div>
 
@@ -360,14 +363,15 @@ input,select {
         document.getElementById("birthdate").value =
           user.birthdate.split("T")[0];
 
-        document
-          .querySelectorAll("#usersTable tr")
-          .forEach((row) => row.classList.remove("highlight"));
-        const selectedRow = [
-          ...document.querySelectorAll("#usersTable tr"),
-        ].find((row) => row.firstChild.textContent == user.id);
-        if (selectedRow) selectedRow.classList.add("highlight");
-      }
+          // Construir la ruta de la imagen basándose en el ID del usuario
+        const previewImage = document.getElementById("xxxxxxx");
+        previewImage.src = `uploads/user-${user.id}.jpg`; // Construye la ruta dinámica
+        previewImage.style.display = "block"; // Muestra la imagen
+
+        document.querySelectorAll("#usersTable tr").forEach((row) => row.classList.remove("highlight"));
+  const selectedRow = [...document.querySelectorAll("#usersTable tr")].find((row) => row.firstChild.textContent == user.id);
+  if (selectedRow) selectedRow.classList.add("highlight");
+}
 
       function addUser() {
         const name = document.getElementById("name").value;

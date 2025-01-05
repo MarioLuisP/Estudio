@@ -287,22 +287,8 @@
           <div id="api-response"></div>
         </div>
       </div>
-      <div class="column right"></div>  // Mostrar preview de la imagen seleccionada
-        document.getElementById('photo').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const previewImage = document.getElementById('previewImage');
-            
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    previewImage.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-    </main>
+      <div class="column right"></div>  
+          </main>
     <!-- =========================== -->
     <!-- Footer: Redes Sociales      -->
     <!-- =========================== -->

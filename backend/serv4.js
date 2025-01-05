@@ -33,18 +33,20 @@ db.getConnection((err) => {
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-const uploadsDir = path.join(__dirname, 'uploads');
+const uploadsDir = path.join(__dirname, '..', 'uploads'); 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 
-
 // Rutas existentes de autenticación
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
 
 const storage = multer.diskStorage({
-  destination: uploadsDir,
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);  // Asegura que apunta a la ubicación correcta
+  },
   filename: (req, file, cb) => {
     const userId = req.body.id;
     const ext = path.extname(file.originalname);
@@ -272,13 +274,38 @@ app.put('/api/upload-photo', (req, res) => {
     });
    });
 
-app.delete("/api/users/:id", (req, res) => {
-  const { id } = req.params;
-  db.query("DELETE FROM users WHERE id = ?", [id], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: "Usuario eliminado exitosamente" });
+   app.delete("/api/users/:id", (req, res) => {
+    const { id } = req.params;
+  
+    // Posibles extensiones de la foto de perfil
+    const possibleExtensions = ['.jpg', '.jpeg', '.png'];
+    let fileFound = false;
+  
+    // Intentar encontrar y eliminar el archivo de la foto de perfil
+    for (const ext of possibleExtensions) {
+      const filePath = path.join(__dirname, '..', 'uploads', `user-${id}${ext}`);
+      if (fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);  // Elimina el archivo si existe
+          fileFound = true;
+          break;
+        } catch (err) {
+          console.error("Error al eliminar la foto de perfil:", err);
+        }
+      }
+    }
+  
+    if (!fileFound) {
+      console.warn(`No se encontró la foto de perfil para el usuario con ID ${id}`);
+    }
+  
+    // Eliminar la fila del usuario en la base de datos
+    db.query("DELETE FROM users WHERE id = ?", [id], (err) => {
+      if (err) return res.status(500).json({ error: err.message });
+  
+      res.json({ message: "Usuario y foto de perfil eliminados exitosamente" });
+    });
   });
-});
 
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
