@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css"
+    />
+
+    <title>Admin Panel Mejorado</title>
+    <style>
+  body {
+	font-family: Arial, sans-serif;
+	background: #f4f4f9;
+	color: #333;
+	padding: 20px;
+	margin: 0;
+	height: 100vh;
+	overflow: hidden;
+	/* Previene scroll en el body */
+}
+.icono-grande {
+	font-size: 3rem;
+	/* Ajusta el tamaño según tus necesidades */
+}
+.fixed-header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 60px;
+	/* Ajusta según el diseño */
+	background-color: #19bdbd;
+	/* Color del header */
+	color: white;
+	text-shadow: 4px 3px 0 #7A7A7A;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 20px;
+	/* Espaciado interno */
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	/* Sombra para separación */
+	z-index: 10;
+	/* Asegura que esté por encima de otros elementos */
+	box-sizing: border-box;
+}
+/* boton desplegable */
+.menu {
+	position: relative;
+}
+.menu button {
+	background: none;
+	border: none;
+	color: white;
+	font-size: 1.8rem;
+	cursor: pointer;
+}
+.menu ul {
+	display: none;
+	position: absolute;
+	right: 0;
+	top: 100%;
+	background-color: #665337;
+	border-radius: 12px;
+	width: 180px;
+	list-style: none;
+	padding: 0;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+.menu ul li {
+	border-bottom: 1px solid #eceacb;
+	padding: 12px 15px;
+}
+.menu ul li:last-child {
+	border-bottom: none;
+}
+.menu ul li a {
+	text-decoration: none;
+	color: #ffffff;
+	font-size: 18px;
+	display: flex;
+	align-items: center;
+	border-radius: 12px;
+}
+.menu ul li a:hover {
+	background-color: #bb8c47;
+}
+.menu ul li i {
+	margin-right: 10px;
+	color: #011216;
+}
+.menu ul li a i {
+	color: white;
+}
+/* Contenedor principal */
+.main-container {
+	margin-top: 60px;
+	/* Mismo valor que la altura del header */
+	display: flex;
+	flex-direction: row;
+	height: 100vh;
+	overflow: hidden;
+}
+/* Contenedor de la columna izquierda (Buscador) */
+.column-40 {
+	width: 40%;
+	background-color: #f4f4f4;
+	padding: 20px;
+	box-sizing: border-box;
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100%;
+	overflow-y: auto;
+}
+/* Contenedor de la columna derecha (Formulario de usuario) */
+.column-60 {
+	width: 60%;
+	margin-left: 40%;
+	padding: 20px;
+	box-sizing: border-box;
+	overflow-y: auto;
+}
+.form-container h3 {
+	margin-top: 0;
+}
+.search-container {
+	margin-bottom: 20px;
+	margin-top:60px;
+	/* Mismo valor que la altura del header */
+	padding: 20px;
+	background: #e2f1c4;
+	border: 4px solid #838f42;
+	border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+.search-container h3 {
+	margin: 0 0 10px 0;
+	margin-top: 0;
+}
+.table-container {
+	margin-top: 1px;
+	/* Mismo valor que la altura del header */
+	margin-left: 40%;
+	width: 60%;
+	height: calc(100vh - 45px);
+	overflow-y: auto;
+	/* Permite el scroll vertical */
+	background: rgb(230, 225, 205);
+	border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+table {
+	width: 100%;
+	border-collapse: collapse;
+	background: #f7f4e7;
+}
+th {
+	position: sticky;
+	top: 0;
+	/* Fija el encabezado al tope del contenedor */
+	background: #0a661e;
+	color: white;
+	z-index: 2;
+	/* Asegura que quede encima de otras filas */
+}
+td,th {
+	border: 1px solid #ddd;
+	padding: 10px;
+	text-align: left;
+}
+tr:hover {
+	background: #f1f1f1;
+}
+.form-container {
+	margin: 10px 0;
+	padding: 10px;
+	background: #ebecae;
+	border: 2px solid #838f42;
+	border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+button {
+	margin: 5px;
+	padding: 10px 15px;
+	border: 1px solid #0f1552;
+	border-radius: 3px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+	cursor: pointer;
+}
+button:hover {
+	opacity: 0.9;
+}
+button.primary {
+	background: #007bff;
+	color: white;
+}
+button.secondary {
+	background: #6c757d;
+	color: white;
+}
+button.danger {
+	background: #dc3545;
+	color: white;
+}
+input,select {
+	margin: 5px 0;
+	padding: 10px;
+	width: calc(100% - 22px);
+	box-sizing: border-box;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+}
+.highlight {
+	background: #eaf5ff !important;
+}
+.form-actions {
+	margin-top: 10px;
+}
+.form-container {
+	margin-top: 10px;
+}
+
+    </style>
+  </head>
+  <body>
+    <header class="fixed-header">
+      <i class="fa-solid fa-dice-d6 icono-grande"></i>
+      <h1>Panel de Administración</h1>
+      <div class="menu">
+        <button onclick="toggleMenu()">&#9776;</button>
+        <ul id="dropdown-menu">
+          <li>
+            <a href="html1.html"><i class="fa-solid fa-house"></i> HTML1</a>
+          </li>
+          <li>
+            <a href="html2.html"><i class="fa-solid fa-user"></i> HTML2</a>
+          </li>
+          <li>
+            <a href="html3.html"><i class="fa-solid fa-envelope"></i> HTML3</a>
+          </li>
+          <li>
+            <a href="html4.html"
+              ><i class="fa-solid fa-layer-group"></i> HTML4</a
+            >
+          </li>
+          <li>
+            <a href="html5.html"><i class="fa-solid fa-gear"></i> HTML5</a>
+          </li>
+        </ul>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <div class="column-40">
+        <div class="search-container">
+          <h3>Buscar Usuario</h3>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Buscar usuario por ID, nombre o email"
+          />
+          <select id="searchType">
+            <option value="id">ID</option>
+            <option value="name">Nombre</option>
+            <option value="email">Email</option>
+          </select>
+          <button class="primary" onclick="searchUser()">Buscar</button>
+          <button class="secondary" onclick="loadUsers()">Ver Todos</button>
+        </div>
+        <div class="form-container">
+          <h3>Gestionar Usuario</h3>
+          <form id="userForm">
+            <input type="hidden" id="userId" />
+            <input type="text" id="name" placeholder="Nombre" required />
+            <input type="email" id="email" placeholder="Email" required />
+            <input type="password" id="password" placeholder="Contraseña" />
+            <select id="gender" required>
+              <option value="male">Hombre</option>
+              <option value="female">Mujer</option>
+              <option value="other">Otro</option>
+            </select>
+            <input type="date" id="birthdate" required />
+            <div class="form-actions">
+              <button class="primary" type="button" onclick="addUser()">
+                Agregar
+              </button>
+              <button class="secondary" type="button" onclick="updateUser()">
+                Actualizar
+              </button>
+              <button class="danger" type="button" onclick="deleteUser()">
+                Eliminar
+              </button>
+              <button class="secondary" type="reset" onclick="clearForm()">
+                Limpiar
+              </button>
+            </div>
+          </form>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center;border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);	background: #5de4cd;
+  ">
+          <img id="xxxxxxx" style="max-width: 30%; max-height: 300px; margin-top: 5px; display: none;border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);">
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Género</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      function loadUsers() {
+        fetch("http://localhost:3000/api/users")
+          .then((response) => response.json())
+          .then((users) => {
+            const tbody = document.querySelector("#usersTable tbody");
+            tbody.innerHTML = "";
+            users.forEach((user) => {
+              tbody.innerHTML += `
+                            <tr>
+                                <td>${user.id}</td>
+                                <td>${user.name}</td>
+                                <td>${user.email}</td>
+                                <td>${user.gender}</td>
+                                <td>${new Date(
+                                  user.birthdate
+                                ).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="primary" onclick='fillForm(${JSON.stringify(
+                                      user
+                                    )})'>Editar</button>
+                                </td>
+                            </tr>
+                        `;
+            });
+          })
+          .catch((error) =>
+            Swal.fire("Error", "Error al cargar usuarios: " + error, "error")
+          );
+      }
+
+      function fillForm(user) {
+        document.getElementById("userId").value = user.id;
+        document.getElementById("name").value = user.name;
+        document.getElementById("email").value = user.email;
+        document.getElementById("gender").value = user.gender;
+        document.getElementById("birthdate").value =
+          user.birthdate.split("T")[0];
+
+          // Construir la ruta de la imagen basándose en el ID del usuario
+        const previewImage = document.getElementById("xxxxxxx");
+        previewImage.src = `uploads/user-${user.id}.jpg`; // Construye la ruta dinámica
+        previewImage.style.display = "block"; // Muestra la imagen
+
+        document.querySelectorAll("#usersTable tr").forEach((row) => row.classList.remove("highlight"));
+  const selectedRow = [...document.querySelectorAll("#usersTable tr")].find((row) => row.firstChild.textContent == user.id);
+  if (selectedRow) selectedRow.classList.add("highlight");
+}
+
+      function addUser() {
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const gender = document.getElementById("gender").value;
+        const birthdate = document.getElementById("birthdate").value;
+
+        const userData = {
+          name,
+          email,
+          password: password || "defaultPassword",
+          gender,
+          birthdate,
+        };
+
+        fetch("http://localhost:3000/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(userData),
+        })
+          .then(async (response) => {
+            const data = await response.json();
+
+            if (response.status === 409) {
+              throw new Error(data.message || "El email ya está registrado.");
+            }
+
+            if (!response.ok) {
+              throw new Error(data.message || "Error al crear usuario");
+            }
+
+            return data;
+          })
+          .then((data) => {
+            Swal.fire("¡Éxito!", "Usuario agregado exitosamente", "success");
+            loadUsers();
+            clearForm();
+          })
+          .catch((error) => {
+            Swal.fire("Error", error.message, "error");
+          });
+      }
+
+      function updateUser() {
+        const userId = document.getElementById("userId").value;
+        if (!userId) {
+          Swal.fire(
+            "Advertencia",
+            "Seleccione un usuario para actualizar.",
+            "warning"
+          );
+          return;
+        }
+
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const gender = document.getElementById("gender").value;
+        const birthdate = document.getElementById("birthdate").value;
+
+        if (password) {
+          Swal.fire({
+            title: "Cambio de contraseña",
+            text: "¿Está seguro de que desea cambiar la contraseña del usuario?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, cambiar",
+            cancelButtonText: "Cancelar",
+          }).then((result) => {
+            if (!result.isConfirmed) {
+              return;
+            }
+            sendUpdate();
+          });
+        } else {
+          sendUpdate();
+        }
+
+        function sendUpdate() {
+          const userData = {
+            name,
+            email,
+            password: password || undefined,
+            gender,
+            birthdate,
+          };
+
+          fetch(`http://localhost:3000/api/users/${userId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userData),
+          })
+            .then((response) => {
+              if (response.status === 409) {
+                throw new Error("ID o Email ya registrado.");
+              }
+              if (!response.ok) {
+                throw new Error("Error en la actualización.");
+              }
+              return response.json();
+            })
+            .then(() => {
+              Swal.fire(
+                "¡Éxito!",
+                "Usuario actualizado correctamente.",
+                "success"
+              );
+              loadUsers();
+              clearForm();
+            })
+            .catch((error) => {
+              Swal.fire("Error", error.message, "error");
+            });
+        }
+      }
+
+      function deleteUser() {
+        const userId = document.getElementById("userId").value;
+        if (!userId) {
+          Swal.fire(
+            "Advertencia",
+            "Seleccione un usuario para eliminar.",
+            "warning"
+          );
+          return;
+        }
+
+        Swal.fire({
+          title: "¿Está seguro?",
+          text: "Esta acción no se puede deshacer.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch(`http://localhost:3000/api/users/${userId}`, {
+              method: "DELETE",
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error("Error al eliminar usuario");
+                }
+                return response.json();
+              })
+              .then(() => {
+                Swal.fire(
+                  "¡Eliminado!",
+                  "Usuario eliminado correctamente.",
+                  "success"
+                );
+                loadUsers();
+                clearForm();
+              })
+              .catch((error) => {
+                Swal.fire(
+                  "Error",
+                  "No se pudo eliminar el usuario: " + error.message,
+                  "error"
+                );
+              });
+          }
+        });
+      }
+
+      function clearForm() {
+        document.getElementById("userForm").reset();
+        document.getElementById("userId").value = "";
+        document
+          .querySelectorAll("#usersTable tr")
+          .forEach((row) => row.classList.remove("highlight"));
+      }
+
+      function searchUser() {
+        const searchInput = document.getElementById("searchInput").value;
+        const searchType = document.getElementById("searchType").value;
+
+        if (!searchInput) {
+          loadUsers();
+          return;
+        }
+
+        fetch(
+          `http://localhost:3000/api/users/search?type=${searchType}&value=${searchInput}`
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Error en la búsqueda");
+            }
+            return response.json();
+          })
+          .then((users) => {
+            const tbody = document.querySelector("#usersTable tbody");
+            tbody.innerHTML = "";
+            users.forEach((user) => {
+              tbody.innerHTML += `
+                            <tr>
+                                <td>${user.id}</td>
+                                <td>${user.name}</td>
+                                <td>${user.email}</td>
+                                <td>${user.gender}</td>
+                                <td>${new Date(
+                                  user.birthdate
+                                ).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="primary" onclick='fillForm(${JSON.stringify(
+                                      user
+                                    )})'>Editar</button>
+                                </td>
+                            </tr>
+                        `;
+            });
+          })
+          .catch((error) =>
+            Swal.fire(
+              "Error",
+              "No se pudo completar la búsqueda: " + error.message,
+              "error"
+            )
+          );
+      }
+
+      window.onload = loadUsers;
+    </script>
+    <script>
+      function toggleMenu() {
+        var menu = document.getElementById("dropdown-menu");
+        if (menu.style.display === "block") {
+          menu.style.display = "none";
+        } else {
+          menu.style.display = "block";
+        }
+      }
+
+      // Cerrar el menú si se hace clic fuera de él
+      window.onclick = function (event) {
+        if (!event.target.matches(".menu button")) {
+          var dropdowns = document.getElementsByClassName("menu");
+          for (var i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i].getElementsByTagName("ul")[0];
+            if (openDropdown.style.display === "block") {
+              openDropdown.style.display = "none";
+            }
+          }
+        }
+      };
+    </script>
+  </body>
+</html>
